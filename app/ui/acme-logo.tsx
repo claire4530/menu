@@ -1,13 +1,13 @@
-import { GlobeAltIcon } from '@heroicons/react/24/outline';
-import { lusitana } from '@/app/ui/fonts';
+import { UserCircleIcon } from '@heroicons/react/24/outline'
+import { lusitana } from '@/app/ui/fonts'
 
-export default function AcmeLogo() {
-  return (
-    <div
-      className={`${lusitana.className} flex flex-row items-center leading-none text-white`}
-    >
-      <GlobeAltIcon className="h-12 w-12 rotate-[15deg]" />
-      <p className="text-[44px]">Acme</p>
-    </div>
-  );
+export default function Personalpage() {
+    return (
+        <div
+            className={`${lusitana.className} flex flex-row items-center leading-none text-white`}
+        >
+            <UserCircleIcon className="h-17 w-17" />
+            <p className="text-[33px]">個人頁面</p>
+        </div>
+    )
 }
