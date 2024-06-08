@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dialog'
 
 interface TableProps {
+    id: number
     state: string
     orderNumber: string
     remainingMealTime: number
@@ -38,148 +39,62 @@ interface TableProps {
 }
 
 export type PaymentFire = {
-    cookerNumber: number
+    cookerNumber: string
     state: '關閉' | '開啟' | '錯誤'
     tableNumber: string
     fireStatus: number
     error: string
     reason: string
     solution: string
+    broken: number
 }
 
-///////////////////////////////
-// 用 tableNumber fetch 對應的 dataFire 資料
-const dataFire: PaymentFire[] = [
-    {
-        cookerNumber: 1,
-        state: '錯誤',
-        tableNumber: '第一桌',
-        fireStatus: 1,
-        error: 'xF000000',
-        reason: '空燒',
-        solution: '關閉電磁爐電源',
-    },
-    {
-        cookerNumber: 2,
-        state: '關閉',
-        tableNumber: '第一桌',
-        fireStatus: 1,
-        error: '/',
-        reason: '/',
-        solution: '/',
-    },
-    {
-        cookerNumber: 1,
-        state: '開啟',
-        tableNumber: '第九桌',
-        fireStatus: 1,
-        error: '/',
-        reason: '/',
-        solution: '/',
-    },
-    {
-        cookerNumber: 3,
-        state: '開啟',
-        tableNumber: '第一桌',
-        fireStatus: 5,
-        error: '/',
-        reason: '/',
-        solution: '/',
-    },
-    {
-        cookerNumber: 1,
-        state: '錯誤',
-        tableNumber: '第八桌',
-        fireStatus: 5,
-        error: 'xF000000',
-        reason: '空燒',
-        solution: '關閉電磁爐電源',
-    },
-    {
-        cookerNumber: 2,
-        state: '錯誤',
-        tableNumber: '第八桌',
-        fireStatus: 5,
-        error: 'xF000000',
-        reason: '空燒',
-        solution: '關閉電磁爐電源',
-    },
-    {
-        cookerNumber: 3,
-        state: '錯誤',
-        tableNumber: '第八桌',
-        fireStatus: 5,
-        error: 'xF000000',
-        reason: '空燒',
-        solution: '關閉電磁爐電源',
-    },
-    {
-        cookerNumber: 4,
-        state: '錯誤',
-        tableNumber: '第八桌',
-        fireStatus: 5,
-        error: 'xF000000',
-        reason: '空燒',
-        solution: '關閉電磁爐電源',
-    },
-    {
-        cookerNumber: 1,
-        state: '錯誤',
-        tableNumber: '第十桌',
-        fireStatus: 5,
-        error: 'xF000000',
-        reason: '空燒',
-        solution: '關閉電磁爐電源',
-    },
-    {
-        cookerNumber: 4,
-        state: '錯誤',
-        tableNumber: '第一桌',
-        fireStatus: 1,
-        error: 'xF000000',
-        reason: '空燒',
-        solution: '關閉電磁爐電源',
-    },
-    {
-        cookerNumber: 1,
-        state: '開啟',
-        tableNumber: '第二桌',
-        fireStatus: 1,
-        error: '/',
-        reason: '/',
-        solution: '/',
-    },
-    {
-        cookerNumber: 2,
-        state: '開啟',
-        tableNumber: '第二桌',
-        fireStatus: 1,
-        error: '/',
-        reason: '/',
-        solution: '/',
-    },
-    {
-        cookerNumber: 3,
-        state: '開啟',
-        tableNumber: '第二桌',
-        fireStatus: 1,
-        error: '/',
-        reason: '/',
-        solution: '/',
-    },
-    {
-        cookerNumber: 4,
-        state: '關閉',
-        tableNumber: '第二桌',
-        fireStatus: 1,
-        error: '/',
-        reason: '/',
-        solution: '/',
-    },
-]
-///////////////////////////////
 
-const Table: React.FC<TableProps> = ({
+async function updateTableState(tableNumber: string, newState: string): Promise<void> {
+
+    const apiUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+    const response: Response = await fetch(`${apiUrl}/api/edit-table-state`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tableNumber, newState })
+    });
+
+    const result: any = await response.json();
+    if (response.ok) {
+        console.log(result.message);
+    } else {
+        console.error(result.message);
+    }
+    
+
+}
+
+async function updateAllCookerState(tableNumber: string, newState: string): Promise<void> {
+
+    const apiUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+    const response: Response = await fetch(`${apiUrl}/api/edit-all-cooker-state`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tableNumber, newState })
+    });
+
+    const result: any = await response.json();
+    if (response.ok) {
+        console.log(result.message);
+    } else {
+        console.error(result.message);
+    }
+    
+
+}
+
+const Table: React.FC<TableProps> = async ({
     state,
     orderNumber,
     remainingMealTime,
@@ -188,31 +103,40 @@ const Table: React.FC<TableProps> = ({
     seats,
 }) => {
     // fetch
-    const cookers = dataFire.filter(
+
+
+    const changeAllCookerState = (tableNumber: string) => {
+        updateAllCookerState(tableNumber, "關閉");
+    }
+    const apiUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    const cookerProps : PaymentFire[] = await fetch(`${apiUrl}/api/cooker`).then((res) => res.json());  
+
+    const cookers = cookerProps.filter(
         (fireItem) => fireItem.tableNumber === tableNumber,
     )
-
-    const changeAllCookerState = () => {
+    const changeState = (tableNumber: string) => {
         // 改資料庫
-        for (let i = 0; i < cookers.length; i++) {
-            cookers[i].state = "關閉";
+        console.log(state);
+        if (state === '用餐中') {
+            updateTableState(tableNumber, "清潔中");
+            orderNumber = '';
+        } else if (state === '清潔中') {
+            updateTableState(tableNumber, "空桌");
+        } else if (state === '空桌') {
+            updateTableState(tableNumber, "已預定");
+        } else if (state === '已預定') {
+            updateTableState(tableNumber, "空桌");
         }
-        // 改cooker state狀態
-    }
-
-    const changeState = () => {
-        // 改資料庫
-        
     }
 
     return (
         <div className="w-full">
-            <Tabs defaultValue="account" className="h-fit">
+            <Tabs defaultValue="account" className="h-fit w-[400px]">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="account">用餐詳情</TabsTrigger>
                     <TabsTrigger value="password">電磁爐狀態</TabsTrigger>
                 </TabsList>
-                <TabsContent value="account" className="h-fit">
+                <TabsContent value="account" className="h-fit w-[400px]">
                     <Card className="h-fit">
                         <div className="h-full">
                             <CardHeader className="flex space-y-1 pr-4 pt-4 h-[124px]">
@@ -232,26 +156,50 @@ const Table: React.FC<TableProps> = ({
                                 
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="flex h-[235px] flex-col justify-between">
-                                <div className="flex flex-col gap-4">
-                                    <div>訂單編號: {orderNumber}</div>
-                                    <div className="flex items-baseline gap-2">
-                                        剩餘用餐時間: {remainingMealTime}
-                                        <span className="text-xs font-bold">
-                                            min
-                                        </span>
-                                    </div>
-                                    <div>
-                                        本日總用餐時間:{' '}
-                                        {Math.floor(totalMealTime / 60)}{' '}
-                                        <span className="text-xs font-bold">
-                                            h&nbsp;
-                                        </span>
-                                        {totalMealTime % 60}{' '}
-                                        <span className="text-xs font-bold">
-                                            min
-                                        </span>
-                                    </div>
+                            <CardContent className="flex h-[240px] flex-col justify-between">
+                                <div className="flex flex-col gap-4 text-sm ">
+                                    {state === '用餐中' ? (
+                                        <>
+                                        <div>訂單編號: {orderNumber}</div>
+                                        <div className="flex items-baseline gap-2">
+                                            剩餘用餐時間: {remainingMealTime}
+                                            <span className="text-xs font-bold">
+                                                min
+                                            </span>
+                                        </div>
+                                        <div>
+                                            本日總用餐時間:{' '}
+                                            {Math.floor(totalMealTime / 60)}{' '}
+                                            <span className="text-xs font-bold">
+                                                h&nbsp;
+                                            </span>
+                                            {totalMealTime % 60}{' '}
+                                            <span className="text-xs font-bold">
+                                                min
+                                            </span>
+                                        </div>
+                                        </>                                 
+                                    ):(
+                                    <>
+                                        <div>訂單編號: --</div>
+                                        <div className="flex items-baseline gap-2">
+                                            剩餘用餐時間: 120
+                                            <span className="text-xs font-bold">
+                                                min
+                                            </span>
+                                        </div>
+                                        <div>
+                                            本日總用餐時間:{' '}
+                                            {Math.floor(totalMealTime / 60)}{' '}
+                                            <span className="text-xs font-bold">
+                                                h&nbsp;
+                                            </span>
+                                            {totalMealTime % 60}{' '}
+                                            <span className="text-xs font-bold">
+                                                min
+                                            </span>
+                                        </div>
+                                        </> )}
                                 </div>
                                 <div className="flex items-center justify-between space-y-12">
                                     {state === '用餐中' && (
@@ -259,7 +207,7 @@ const Table: React.FC<TableProps> = ({
                                         <div className='flex flex-col gap-7'>
                                             用餐人數:{' 4人'}
                                             <OrderDetails>
-                                                <Button variant="outline">
+                                                <Button variant="outline" >
                                                     訂單明細
                                                 </Button>
                                             </OrderDetails>
@@ -279,7 +227,7 @@ const Table: React.FC<TableProps> = ({
                                     <Button
                                         variant="outline"
                                         className="ml-auto px-6"
-                                        onClick={changeState}
+                                        onClick={() => changeState(tableNumber)}
                                     >
                                         {state === '用餐中'
                                             ? '結帳'
@@ -296,16 +244,17 @@ const Table: React.FC<TableProps> = ({
                         </div>
                     </Card>
                 </TabsContent>
-                <TabsContent value="password" className="h-fit">
+                <TabsContent value="password" className="h-fit w-[400px]">
                     <Card className="h-fit">
-                        <CardHeader className="space-y-5 pt-8 h-[120x]">
+                        <CardHeader className="space-y-5 pt-8 h-[120px]">
                             <CardTitle>{tableNumber}<span className='text-base ml-2'>&nbsp;({seats}人座)</span> </CardTitle>
                             <CardDescription>查看電磁爐狀態</CardDescription>
                         </CardHeader>
-                        <CardContent className="h-[239px] flex flex-col justify-between">
+                        <CardContent className="h-[240px] flex flex-col justify-between">
                             <div className='space-y-5'>
                                 {cookers.map((item, index) => (
-                                    <Cooker key={index} {...item} />
+                                    <Cooker key={index} {...item} index={index}/>
+
                                 ))}
                             </div>
                             <div className='flex justify-between'>
@@ -326,11 +275,11 @@ const Table: React.FC<TableProps> = ({
                                             <ScrollArea className="h-[320px] w-[450px] p-4">
                                                 <div>
                                                     {cookers.map((item, index) => (
-                                                        item.state === '錯誤' && (
+                                                        item.broken === 1 && (
                                                             <div key={index}>
                                                                 <div className="gap-2 font-bold justify-right flex px-4 py-6 h-10 items-center rounded-md text-black hover:bg-slate-100">
                                                                     <CookingPot />
-                                                                    {item.cookerNumber}號電磁爐
+                                                                    {index+1}號電磁爐
                                                                 </div>
                                                                 <div className="justify-right flex px-4 py-6 h-10 items-center rounded-md text-black hover:bg-slate-100">
                                                                     電磁爐錯誤代碼：{item.error}
@@ -345,7 +294,7 @@ const Table: React.FC<TableProps> = ({
                                                             </div>
                                                         )
                                                     ))}
-                                                    {cookers.every(item => item.state !== '錯誤') && (
+                                                    {cookers.every(item => item.broken !== 1) && (
                                                         <div className="text-center">沒有錯誤訊息</div>
                                                     )}
                                                 </div>
@@ -355,7 +304,7 @@ const Table: React.FC<TableProps> = ({
                                     </DialogContent>
                                 </Dialog>    
                                 </div>     
-                                    <Button type="button" className="mr-4" onClick={changeAllCookerState} >
+                                    <Button type="button" className="mr-4" onClick={() => changeAllCookerState(tableNumber)} >
                                         一鍵關閉
                                     </Button>                                 
                             </div>

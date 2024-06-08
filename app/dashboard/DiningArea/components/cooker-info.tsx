@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { useState } from "react"
 
 interface CookerInfoProps {
-    cookerNumber: number
+    cookerNumber: string
     state: boolean
     handlePowerStateChange: (state: boolean) => void
     tableNumber: string

@@ -1,4 +1,3 @@
-"use client";
 // pages/tabs-demo.js
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import Table from './components/table';
 import { Search } from './components/search';
 
 export type Payment = {
+    id: number;
     state: '用餐中' | '清潔中' | '空桌' | '已預定';
     orderNumber: string;
     remainingMealTime: number;
@@ -15,22 +15,11 @@ export type Payment = {
     seats: number;
 };
 
-export function TabsDemo() {
-    const [data, setData] = useState<Payment[]>([]);
-
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await fetch('C:/Users/claire/Desktop/managerControl/nextjs-dashboard/app/api/payments');
-                const result = await response.json();
-                setData(result);
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-            }
-        }
-
-        fetchData();
-    }, []);
+export async function TabsDemo() {
+    
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    
+    const areas : Payment[] = await fetch(`${apiUrl}/api/areas`).then((res) => res.json());  
 
     return (
         <div className="hidden flex-col md:flex">
@@ -50,8 +39,10 @@ export function TabsDemo() {
             <div className="flex-1 space-y-4 p-8 pt-6">
                 <div className="flex items-center justify-between space-y-2"></div>
                 <div className="grid h-screen grid-cols-2 gap-x-16 gap-y-8 px-28">
-                    {data.map((item, index) => (
-                        <Table key={index} {...item} />
+                    {/* {users[0]?.state} */}
+                    {areas.map((item, index) => (
+                        <Table key={index} {...item}/>
+                        // <div key={ item.user_id }>{ item.user_id }</div>
                     ))}
                 </div>
             </div>

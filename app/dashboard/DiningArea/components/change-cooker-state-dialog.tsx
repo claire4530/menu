@@ -13,7 +13,7 @@ import CookerInfo from './cooker-info'
 import { useState } from "react"
 
 interface ChangeCookerStateDialogProps {
-    cookerNumber: number
+    cookerNumber: string
     state: boolean
     handlePowerStateChange: (state: boolean) => void
     tableNumber: string
