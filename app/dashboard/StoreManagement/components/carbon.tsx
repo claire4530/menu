@@ -1,256 +1,333 @@
 import * as React from 'react'
 import {
-    CarbonLineChartMonth,
-    CarbonLineChartDay,
-    CarbonLineChartYear,
-} from './carbon-LineChart'
-import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-  } from "@/components/ui/carousel"
+import { useEffect, useState } from 'react'
+import dayjs from 'dayjs'
+
+interface PowerUsage {
+    id: number
+    powerName: string
+    powerTime: string
+    watt: number
+}
 
 export function CarbonDay() {
-    const data = [
-        { date: "2024-04-21", value: 100},
-        { date: "2024-04-20", value: 125},
-        { date: "2024-04-19", value: 209},
-    ];
+
+    const [powerUsageData, setPowerUsageData] = useState<PowerUsage[]>([]);
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/api/power-usage`);
+            const result = await response.json();
+
+            setPowerUsageData(result);
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const calculateTotalWatt = (timeFrame: string) => {
+        const now = dayjs(); // 当前时间
+    
+        const filteredData = powerUsageData.filter(item => {
+            const itemDate = dayjs(item.powerTime); // 转换数据时间为dayjs对象
+    
+            if (timeFrame === 'dayUsage') {
+                // 过滤出今天的数据
+                return itemDate.isSame(now, 'day');
+            } else if (timeFrame === 'monthUsage') {
+                // 过滤出当前月的数据
+                return itemDate.isSame(now, 'month');
+            } else if (timeFrame === 'yearUsage') {
+                // 过滤出当前年的数据
+                return itemDate.isSame(now, 'year');
+            } else if (timeFrame === 'yesterdayUsage') {
+                // 过滤出昨天的数据
+                return itemDate.isSame(now.subtract(1, 'day'), 'day');
+            } else if (timeFrame === 'lastMonthUsage') {
+                // 过滤出上个月的数据
+                return itemDate.isSame(now.subtract(1, 'month'), 'month');
+            } else if (timeFrame === 'lastYearUsage') {
+                // 过滤出去年的数据
+                return itemDate.isSame(now.subtract(1, 'year'), 'year');
+            }
+            return false;
+        });
+    
+        return filteredData.reduce((total, item) => total + item.watt, 0);
+    };
+
+    useEffect(() => {
+        fetchData();
+        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+
+        return () => clearInterval(intervalId); // 清除定時器
+    }, [apiUrl]);
+
 
     // 計算碳排放量
-    const carbonEmission = data.reduce((total, item) => total + item.value, 0) * 0.554;
+    const carbonEmission = (calculateTotalWatt('dayUsage')/1000) * 0.494
 
-    // 計算昨日與今日的碳排放增減
-    const yesterdayValue = data[1].value;
-    const todayValue = data[0].value;
-    const emissionChange = ((todayValue - yesterdayValue) / yesterdayValue) * 100;
+    // 计算昨日与今日的碳排放增减
+    const yesterdayTotalWatt = calculateTotalWatt('yesterdayUsage');
+    const todayTotalWatt = calculateTotalWatt('dayUsage');
+    const emissionChange = ((todayTotalWatt - yesterdayTotalWatt) / (yesterdayTotalWatt || 1)) * 100;
 
     // 判斷碳排放增減的文字描述
-    const changeDescription = emissionChange > 0 ? "增加" : "減少";
-    const today = new Date();
-    const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-    
-    //圖表
-    const [selectedCharts, setSelectedCharts] = React.useState('dayMoney')
-
-    const handleChangeCharts = (value: string) => {
-        setSelectedCharts(value)
-        
-    }
-
-        // 獲取當前日期
-    const currentDate = new Date()
-    // 獲取當前月份
-    const currentMonth = currentDate.getMonth() + 1
-    const currentYear = currentDate.getFullYear();
+    const changeDescription = emissionChange > 0 ? '增加' : '減少'
+    const today = new Date()
+    const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
 
     return (
         <>
-        <Carousel className="h-[340px]">
-            <CarouselContent>
-                <CarouselItem>
-                    <div className="p-1">
-                    <Card className="">
-                        <CardHeader>
-                            <div className='flex gap-4'>
-                                <CardTitle>本日碳排放分析</CardTitle>
-                                <CardDescription className="pt-1">
-                                    {formattedDate}
-                                </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>                  
-                            您今日產生了{carbonEmission.toFixed(3)}公斤的二氧化碳，相較於昨日{changeDescription}了 {Math.abs(emissionChange).toFixed(1)}% !
-                        </CardContent>
-                    </Card>
-                    <Card className="mt-10">
-                        <CardHeader>
-                            <CardTitle>什麼是碳排放？ </CardTitle>
-                            <CardDescription className="pt-2">
-                                發電的燃燒行為產生二氧化碳（CO2）
+            <div className="p-1">
+                <Card className="">
+                    <CardHeader>
+                        <div className="flex gap-4">
+                            <CardTitle>本日碳排放分析</CardTitle>
+                            <CardDescription className="pt-1">
+                                {formattedDate}
                             </CardDescription>
-                        </CardHeader>
-                        <CardContent> 
-                        根據經濟部能源局112年度最新計算結果：每1度電會產生0.494公斤的二氧化碳                 
-                        </CardContent>
-                    </Card>
-                    </div>
-                </CarouselItem>
-                <CarouselItem>
-                    <Card className="">
-                        <CarbonLineChartDay />
-                    </Card>
-                </CarouselItem>
-            </CarouselContent>
-            <CarouselPrevious className='ml-8'/>
-            <CarouselNext className='mr-8'/>
-        </Carousel>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        您今日產生了{carbonEmission.toFixed(3)}
+                        公斤的二氧化碳，相較於昨日
+                        {changeDescription}了{' '}
+                        {Math.abs(emissionChange).toFixed(1)}% !
+                    </CardContent>
+                </Card>
+                <Card className="mt-10">
+                    <CardHeader>
+                        <CardTitle>什麼是碳排放？ </CardTitle>
+                        <CardDescription className="pt-2">
+                            發電的燃燒行為產生二氧化碳（CO2）
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        根據經濟部能源局112年度最新計算結果：每1度電會產生0.494公斤的二氧化碳
+                    </CardContent>
+                </Card>
+            </div>
         </>
-    );
+    )
 }
 
 export function CarbonMonth() {
-    const data = [
-        { date: "2024-04", value: 4100 },
-        { date: "2024-05", value: 9000 },
-        { date: "2024-06", value: 7125 },
-    ];
 
-    // 獲取當前日期
-    const today = new Date();
-    const currentYear = today.getFullYear().toString();
-    const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
-    const currentMonthData = data.find(item => item.date === `${currentYear}-${currentMonth}`);
-    const lastMonthData = data.find(item => {
-        const [year, month] = item.date.split("-");
-        const lastMonth = (today.getMonth() === 0 ? 12 : today.getMonth()).toString().padStart(2, '0');
-        const lastYear = today.getMonth() === 0 ? (today.getFullYear() - 1).toString() : currentYear;
-        return year === lastYear && month === lastMonth;
-    });
+    const [powerUsageData, setPowerUsageData] = useState<PowerUsage[]>([]);
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
-    // 檢查數據是否存在
-    const currentMonthValue = currentMonthData ? currentMonthData.value : 0;
-    const lastMonthValue = lastMonthData ? lastMonthData.value : 0;
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/api/power-usage`);
+            const result = await response.json();
 
-    // 計算碳排放增減百分比
-    const emissionChange = lastMonthValue ? ((currentMonthValue - lastMonthValue) / lastMonthValue) * 100 : 0;
+            setPowerUsageData(result);
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const calculateTotalWatt = (timeFrame: string) => {
+        const now = dayjs(); // 当前时间
+    
+        const filteredData = powerUsageData.filter(item => {
+            const itemDate = dayjs(item.powerTime); // 转换数据时间为dayjs对象
+    
+            if (timeFrame === 'dayUsage') {
+                // 过滤出今天的数据
+                return itemDate.isSame(now, 'day');
+            } else if (timeFrame === 'monthUsage') {
+                // 过滤出当前月的数据
+                return itemDate.isSame(now, 'month');
+            } else if (timeFrame === 'yearUsage') {
+                // 过滤出当前年的数据
+                return itemDate.isSame(now, 'year');
+            } else if (timeFrame === 'yesterdayUsage') {
+                // 过滤出昨天的数据
+                return itemDate.isSame(now.subtract(1, 'day'), 'day');
+            } else if (timeFrame === 'lastMonthUsage') {
+                // 过滤出上个月的数据
+                return itemDate.isSame(now.subtract(1, 'month'), 'month');
+            } else if (timeFrame === 'lastYearUsage') {
+                // 过滤出去年的数据
+                return itemDate.isSame(now.subtract(1, 'year'), 'year');
+            }
+            return false;
+        });
+    
+        return filteredData.reduce((total, item) => total + item.watt, 0);
+    };
+
+    useEffect(() => {
+        fetchData();
+        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+
+        return () => clearInterval(intervalId); // 清除定時器
+    }, [apiUrl]);
+
+
+    // 計算碳排放量
+    const carbonEmission = (calculateTotalWatt('monthUsage')/1000) * 0.494
+
+    const lastYearTotalWatt = calculateTotalWatt('lastMonthUsage');
+    const thisYearTotalWatt = calculateTotalWatt('monthUsage');
+    const emissionChange = ((thisYearTotalWatt - lastYearTotalWatt) / (lastYearTotalWatt || 1)) * 100;
 
     // 判斷碳排放增減的文字描述
-    const changeDescription = emissionChange > 0 ? "增加" : "減少";
+    const changeDescription = emissionChange > 0 ? '增加' : '減少'
+    const today = new Date()
+    const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
 
     return (
         <>
-        <Carousel className="h-[340px]">
-            <CarouselContent>
-                <CarouselItem>
-                    <div className="p-1">
-                    <Card className="">
-                        <CardHeader>
-                            <div className='flex gap-4'>
-                                <CardTitle>本月碳排放分析</CardTitle>
-                                <CardDescription className="pt-1">
-                                    {currentMonth}月
-                                </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>                  
-                            您這個月產生了{currentMonthValue .toFixed(3)}公斤的二氧化碳，相較於上個月{changeDescription}了 {Math.abs(emissionChange).toFixed(1)}% !
-                        </CardContent>
-                    </Card>
-                    <Card className="mt-10">
-                        <CardHeader>
-                            <CardTitle>什麼是碳排放？ </CardTitle>
-                            <CardDescription className="pt-2">
-                                發電的燃燒行為產生二氧化碳（CO2）
+            <div className="p-1">
+                <Card className="">
+                    <CardHeader>
+                        <div className="flex gap-4">
+                            <CardTitle>本月碳排放分析</CardTitle>
+                            <CardDescription className="pt-1">
+                                {formattedDate}
                             </CardDescription>
-                        </CardHeader>
-                        <CardContent> 
-                        根據經濟部能源局112年度最新計算結果：每1度電會產生0.494公斤的二氧化碳                
-                        </CardContent>
-                    </Card>
-                    </div>
-                </CarouselItem>
-                <CarouselItem>
-                    <Card className="">
-                        <CarbonLineChartMonth />
-                    </Card>
-                </CarouselItem>
-            </CarouselContent>
-            <CarouselPrevious className='ml-8'/>
-            <CarouselNext className='mr-8'/>
-        </Carousel>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        您這個月產生了{carbonEmission.toFixed(3)}
+                        公斤的二氧化碳，相較於上個月
+                        {changeDescription}了{' '}
+                        {Math.abs(emissionChange).toFixed(1)}% !
+                    </CardContent>
+                </Card>
+                <Card className="mt-10">
+                    <CardHeader>
+                        <CardTitle>什麼是碳排放？ </CardTitle>
+                        <CardDescription className="pt-2">
+                            發電的燃燒行為產生二氧化碳（CO2）
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        根據經濟部能源局112年度最新計算結果：每1度電會產生0.494公斤的二氧化碳
+                    </CardContent>
+                </Card>
+            </div>
         </>
-    );
+    )
 }
 
 export function CarbonYear() {
-    const data = [
-        { date: "2024", value: 89125 },
-        { date: "2023", value: 64100 },
-        { date: "2022", value: 121209 },
-    ];
+
+    const [powerUsageData, setPowerUsageData] = useState<PowerUsage[]>([]);
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/api/power-usage`);
+            const result = await response.json();
+
+            setPowerUsageData(result);
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const calculateTotalWatt = (timeFrame: string) => {
+        const now = dayjs(); // 当前时间
+    
+        const filteredData = powerUsageData.filter(item => {
+            const itemDate = dayjs(item.powerTime); // 转换数据时间为dayjs对象
+    
+            if (timeFrame === 'dayUsage') {
+                // 过滤出今天的数据
+                return itemDate.isSame(now, 'day');
+            } else if (timeFrame === 'monthUsage') {
+                // 过滤出当前月的数据
+                return itemDate.isSame(now, 'month');
+            } else if (timeFrame === 'yearUsage') {
+                // 过滤出当前年的数据
+                return itemDate.isSame(now, 'year');
+            } else if (timeFrame === 'yesterdayUsage') {
+                // 过滤出昨天的数据
+                return itemDate.isSame(now.subtract(1, 'day'), 'day');
+            } else if (timeFrame === 'lastMonthUsage') {
+                // 过滤出上个月的数据
+                return itemDate.isSame(now.subtract(1, 'month'), 'month');
+            } else if (timeFrame === 'lastYearUsage') {
+                // 过滤出去年的数据
+                return itemDate.isSame(now.subtract(1, 'year'), 'year');
+            }
+            return false;
+        });
+    
+        return filteredData.reduce((total, item) => total + item.watt, 0);
+    };
+
+    useEffect(() => {
+        fetchData();
+        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+
+        return () => clearInterval(intervalId); // 清除定時器
+    }, [apiUrl]);
+
+
+    // 計算碳排放量
+    const carbonEmission = (calculateTotalWatt('yearUsage')/1000) * 0.494
+
+    const lastYearTotalWatt = calculateTotalWatt('lastYearUsage');
+    const thisYearTotalWatt = calculateTotalWatt('yearUsage');
+    const emissionChange = ((thisYearTotalWatt - lastYearTotalWatt) / (lastYearTotalWatt || 1)) * 100;
 
     // 判斷碳排放增減的文字描述
-    const today = new Date();
+    const changeDescription = emissionChange > 0 ? '增加' : '減少'
+    const today = new Date()
+    const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
 
-    // 獲取當前年份
-    const currentYear = today.getFullYear().toString();
-    const lastYear = (parseInt(currentYear) - 1).toString();
-
-    // 計算今年和去年的碳排放量
-    const currentYearData = data.find(item => item.date === currentYear);
-    const lastYearData = data.find(item => item.date === lastYear);
-
-    // 檢查數據是否存在
-    const currentYearValue = currentYearData ? currentYearData.value : 0;
-    const lastYearValue = lastYearData ? lastYearData.value : 0;
-
-    // 計算碳排放增減百分比
-    const emissionChange = ((currentYearValue - lastYearValue) / lastYearValue) * 100;
-
-    // 判斷碳排放增減的文字描述
-    const changeDescription = emissionChange > 0 ? "增加" : "減少";
     return (
         <>
-            <Carousel className="h-[340px]">
-                <CarouselContent>
-                    <CarouselItem>
-                        <div className="p-1">
-                            <Card className="">
-                                <CardHeader>
-                                    <div className='flex gap-4'>
-                                        <CardTitle>本年碳排放分析</CardTitle>
-                                        <CardDescription className="pt-1">
-                                            {currentYear}年
-                                        </CardDescription>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    您今年產生了{(currentYearValue * 0.494).toFixed(3)}公斤的二氧化碳，相較於去年{changeDescription}了 {Math.abs(emissionChange).toFixed(1)}% !
-                                </CardContent>
-                            </Card>
-                            <Card className="mt-10">
-                                <CardHeader>
-                                    <CardTitle>什麼是碳排放？ </CardTitle>
-                                    <CardDescription className="pt-2">
-                                        發電的燃燒行為產生二氧化碳（CO2）
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    根據經濟部能源局112年度最新計算結果：每1度電會產生0.494公斤的二氧化碳
-                                </CardContent>
-                            </Card>
+            <div className="p-1">
+                <Card className="">
+                    <CardHeader>
+                        <div className="flex gap-4">
+                            <CardTitle>本年碳排放分析</CardTitle>
+                            <CardDescription className="pt-1">
+                                {formattedDate}
+                            </CardDescription>
                         </div>
-                    </CarouselItem>
-                    <CarouselItem>
-                        <Card className="p-0">
-                            <div className=''>
-                                <CarbonLineChartYear />
-                            </div>
-                        </Card>
-                    </CarouselItem>
-                </CarouselContent>
-                <CarouselPrevious className='ml-8'/>
-                <CarouselNext className='mr-8'/>
-            </Carousel>
+                    </CardHeader>
+                    <CardContent>
+                        您今年產生了{carbonEmission.toFixed(3)}
+                        公斤的二氧化碳，相較於去年
+                        {changeDescription}了{' '}
+                        {Math.abs(emissionChange).toFixed(1)}% !
+                    </CardContent>
+                </Card>
+                <Card className="mt-10">
+                    <CardHeader>
+                        <CardTitle>什麼是碳排放？ </CardTitle>
+                        <CardDescription className="pt-2">
+                            發電的燃燒行為產生二氧化碳（CO2）
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        根據經濟部能源局112年度最新計算結果：每1度電會產生0.494公斤的二氧化碳
+                    </CardContent>
+                </Card>
+            </div>
         </>
-    );
+    )
 }

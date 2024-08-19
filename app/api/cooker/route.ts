@@ -1,24 +1,20 @@
-import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { NextResponse } from 'next/server'
+import db from '@/lib/db'
 
-export async function GET(){
+export async function GET() {
     try {
         const results = await new Promise((resolve, reject) => {
             db.query('SELECT * FROM cooker', (err: any, results: []) => {
                 if (err) {
-                    reject(err);
+                    reject(err)
                 } else {
-                    resolve(results);
+                    resolve(results)
                 }
-            });
-        });
-        console.log(results);
-        return NextResponse.json(results);
-        
+            })
+        })
+        console.log(results)
+        return NextResponse.json(results)
     } catch (error) {
-        return NextResponse.json(
-            { message: error }, 
-            { status: 500}
-        );
+        return NextResponse.json({ message: error }, { status: 500 })
     }
 }

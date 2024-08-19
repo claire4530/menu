@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function SignUpPage() {
     const [username, setUsername] = useState('')
@@ -22,33 +24,33 @@ export default function SignUpPage() {
         <div className="flex min-h-screen flex-col items-center justify-center">
             <h1 className="mb-6 text-3xl font-bold">Sign Up</h1>
             {error && <p className="mb-4 text-red-500">{error}</p>}
-            <input
+            <Input
                 type="text"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="mb-4 rounded-md border border-gray-300 px-4 py-2"
             />
-            <input
+            <Input
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mb-4 rounded-md border border-gray-300 px-4 py-2"
             />
-            <input
+            <Input
                 type="password"
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="mb-4 rounded-md border border-gray-300 px-4 py-2"
             />
-            <button
+            <Button
                 onClick={handleSignUp}
                 className="rounded-md bg-green-500 px-6 py-3 text-white hover:bg-green-600"
             >
                 Sign Up
-            </button>
+            </Button>
         </div>
     )
 }

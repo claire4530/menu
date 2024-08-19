@@ -1,26 +1,33 @@
 // pages/tabs-demo.js
-import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import Table from './components/table';
-import { Search } from './components/search';
+import React, { useEffect, useState } from 'react'
+import { Search } from './components/search'
+import Clean from './components/clean'
+import UpdateTable from './components/update-table';
 
 export type Payment = {
-    id: number;
-    state: '用餐中' | '清潔中' | '空桌' | '已預定';
-    orderNumber: string;
-    remainingMealTime: number;
-    totalMealTime: number;
-    tableNumber: string;
-    cookerNumber: number;
-    seats: number;
+    id: number
+    state: '用餐中' | '清潔中' | '空桌' | '已預定'
+    orderNumber: string
+    remainingMealTime: number
+    totalMealTime: number
+    tableNumber: string
+    cookerNumber: number
+    seats: number
+    notify: string
+}
+
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+const fetchAreas = async (): Promise<Payment[]> => {
+    const response = await fetch(`${apiUrl}/api/areas`);
+    return await response.json();
 };
 
-export async function TabsDemo() {
-    
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-    
-    const areas : Payment[] = await fetch(`${apiUrl}/api/areas`).then((res) => res.json());  
 
+export async function TabsDemo() {
+
+    const initialAreas = await fetchAreas();
+    
     return (
         <div className="hidden flex-col md:flex">
             <div className="border-b">
@@ -32,22 +39,19 @@ export async function TabsDemo() {
                         <Search />
                     </div>
                     <div className="ml-auto flex items-center space-x-4">
-                        <Button variant="outline">清潔桌子</Button>
+                        <Clean />
                     </div>
                 </div>
             </div>
             <div className="flex-1 space-y-4 p-8 pt-6">
                 <div className="flex items-center justify-between space-y-2"></div>
-                <div className="grid h-screen grid-cols-2 gap-x-16 gap-y-8 px-28">
-                    {/* {users[0]?.state} */}
-                    {areas.map((item, index) => (
-                        <Table key={index} {...item}/>
-                        // <div key={ item.user_id }>{ item.user_id }</div>
-                    ))}
+                <div className="">
+                    <UpdateTable initialAreas={initialAreas} />
+                  
                 </div>
             </div>
         </div>
-    );
+    )
 }
 
-export default TabsDemo;
+export default TabsDemo

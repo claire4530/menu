@@ -1,3 +1,4 @@
+'use client'
 import { ReactNode } from 'react'
 import {
     Dialog,
@@ -8,9 +9,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import CookerInfo from './cooker-info'
-import { useState } from "react"
+import { useState } from 'react'
 
 interface ChangeCookerStateDialogProps {
     cookerNumber: string
@@ -23,6 +23,8 @@ interface ChangeCookerStateDialogProps {
     reason: string
     solution: string
     children: ReactNode
+    databaseFireStatus: number
+    databaseState: string
 }
 
 const ChangeCookerStateDialog: React.FC<ChangeCookerStateDialogProps> = ({
@@ -36,9 +38,9 @@ const ChangeCookerStateDialog: React.FC<ChangeCookerStateDialogProps> = ({
     reason,
     solution,
     children,
+    databaseFireStatus,
+    databaseState,
 }) => {
-    
-
     return (
         <Dialog>
             <DialogTrigger asChild>{children}</DialogTrigger>
@@ -46,14 +48,26 @@ const ChangeCookerStateDialog: React.FC<ChangeCookerStateDialogProps> = ({
                 <DialogHeader>
                     <DialogTitle></DialogTitle>
                     <DialogDescription>
-                        <CookerInfo cookerNumber={cookerNumber} state={state} handlePowerStateChange={handlePowerStateChange} tableNumber={tableNumber} fireStatus={fireStatus} handleFireStateChange={handleFireStateChange} error={error} reason={reason} solution={solution} />
+                        <CookerInfo
+                            cookerNumber={cookerNumber}
+                            state={state}
+                            handlePowerStateChange={handlePowerStateChange}
+                            tableNumber={tableNumber}
+                            fireStatus={fireStatus}
+                            handleFireStateChange={handleFireStateChange}
+                            error={error}
+                            reason={reason}
+                            solution={solution}
+                            databaseFireStatus={databaseFireStatus}
+                            databaseState={databaseState}
+                        />
                     </DialogDescription>
                 </DialogHeader>
-                <DialogFooter>
+                {/* <DialogFooter>
                     <Button type="submit" className="mr-4">
                         儲存變更
                     </Button>
-                </DialogFooter>
+                </DialogFooter> */}
             </DialogContent>
         </Dialog>
     )

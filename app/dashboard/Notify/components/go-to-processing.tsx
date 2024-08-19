@@ -4,5 +4,3 @@ interface TableProps {
     date: string
     tableNumber: string
 }
-
-

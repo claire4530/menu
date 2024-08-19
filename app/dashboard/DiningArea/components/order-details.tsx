@@ -44,7 +44,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ children }) => {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-        
     )
 }
 
