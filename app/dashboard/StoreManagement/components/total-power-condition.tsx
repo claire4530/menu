@@ -15,7 +15,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { OverviewYear, OverviewMonth, OverviewDay} from './overview-power'
 import {RecentPowerDay, RecentPowerMonth, RecentPowerYear} from './sort-power-usage'
 
 const TotalPowerCondition : React.FC = () => {
@@ -40,7 +39,7 @@ const TotalPowerCondition : React.FC = () => {
                     onValueChange={handleChangeCharts}
                     defaultValue="dayMoney"
                 >
-                    <SelectTrigger className="ml-4 w-[200px]">
+                    <SelectTrigger className="ml-4 w-[220px]">
                         <SelectValue placeholder="Theme" />
                     </SelectTrigger>
                     <SelectContent>

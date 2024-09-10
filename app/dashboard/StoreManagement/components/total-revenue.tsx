@@ -27,20 +27,6 @@ interface Area {
     yearly_revenue: number
 }
 
-// async function editState(id: number, state: string, stateButton: string): Promise<void> {
-
-//     const apiUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || ''
-//     await fetch(`${apiUrl}/api/edit-notify-state`,
-//         {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({ id, state, stateButton }),
-//         }
-//     )
-// }
-
 const TotalRevenue : React.FC = () => {
 
     const currentDate = new Date()
@@ -54,6 +40,7 @@ const TotalRevenue : React.FC = () => {
     }
 
     const [moneyProps, setMoney] = useState<Area[]>([]);
+    const [yeaterdayMoney, setYeaterdayMoney] = useState<Area[]>([]);
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
     const fetchData = async () => {
@@ -67,6 +54,14 @@ const TotalRevenue : React.FC = () => {
             });
     
             setMoney(filteredData);
+
+            // 如果當日無資料，找出資料中最新的一筆
+            const latestData = result.reduce((latest: { date: string }, item: { date: string }) => {
+                return dayjs(item.date).isAfter(dayjs(latest.date)) ? item : latest;
+            }, result[0]); // 初始化為第一筆資料
+            
+            // 設置為最新資料
+            setYeaterdayMoney([latestData]);
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -114,38 +109,51 @@ const TotalRevenue : React.FC = () => {
             <CardContent>
                 {selectedMoney === 'dayMoney' && (
                     <>
-                        {moneyProps.map((money) => (
+                        {moneyProps.length > 0 ? (
+                            moneyProps.map((money) => (
                             <div key={money.id} className="mt-2 font-bold text-4xl">
                                 <p>$ {money.daily_revenue}</p>
                             </div>
-                        ))}
-                        {/* <p className="mt-2 text-xs text-muted-foreground">
-                            +20.1% from yesterday
-                        </p> */}
+                            ))
+                        ) : (
+                            <div className="mt-2 font-bold text-4xl">
+                                <p>$ 0.00</p>
+                            </div>
+                        )}
                     </>
                 )}
                 {selectedMoney === 'monthMoney' && (
                     <>
-                        {moneyProps.map((money) => (
+                        {moneyProps.length > 0 ? (
+                            moneyProps.map((money) => (
                             <div key={money.id} className="mt-2 font-bold text-4xl">
                                 <p>$ {money.monthly_revenue}</p>
                             </div>
-                        ))}
-                        {/* <p className="mt-2 text-xs text-muted-foreground">
-                            +20.1% from last month
-                        </p> */}
-                    </>
+                            ))
+                        ) : (
+                            yeaterdayMoney.map((money) => (
+                            <div key={money.id} className="mt-2 font-bold text-4xl">
+                                <p>$ {money.monthly_revenue}</p>
+                            </div>
+                            ))
+                        )}
+                    </> 
                 )}
                 {selectedMoney === 'yearMoney' && (
                     <>
-                        {moneyProps.map((money) => (
+                        {moneyProps.length > 0 ? (
+                            moneyProps.map((money) => (
                             <div key={money.id} className="mt-2 font-bold text-4xl">
                                 <p>$ {money.yearly_revenue}</p>
                             </div>
-                        ))}
-                        {/* <p className="mt-2 text-xs text-muted-foreground">
-                            +20.1% from last year
-                        </p> */}
+                            ))
+                        ) : (
+                            yeaterdayMoney.map((money) => (
+                            <div key={money.id} className="mt-2 font-bold text-4xl">
+                                <p>$ {money.yearly_revenue}</p>
+                            </div>
+                            ))
+                        )}
                     </>
                 )}
             </CardContent>

@@ -7,8 +7,8 @@ export async function POST(req: Request) {
             await req.json()
 
         const query =
-            'INSERT INTO areas (state, tableNumber, cookerNumber, seats, socketNumber, notify) VALUES (?, ?, ?, ?, ?, ?);'
-        const values = ["空桌", tableNumber, cookerNumber, seats, socketNumber, "已處理"]
+            'INSERT INTO areas (state, tableNumber, cookerNumber, seats, socketNumber, notify, business_id) VALUES (?, ?, ?, ?, ?, ?, ?);'
+        const values = ["空桌", tableNumber, cookerNumber, seats, socketNumber, "已處理", "1"]
 
         await new Promise((resolve, reject) => {
             db.query(query, values, (err: any) => {

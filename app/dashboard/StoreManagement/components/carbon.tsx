@@ -66,7 +66,7 @@ export function CarbonDay() {
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);
@@ -172,7 +172,7 @@ export function CarbonMonth() {
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);
@@ -277,7 +277,7 @@ export function CarbonYear() {
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);

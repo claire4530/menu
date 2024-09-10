@@ -1,19 +1,21 @@
 // components/UpdateTable.tsx
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import Table from './table';
 
 export type Payment = {
     id: number;
     state: '用餐中' | '清潔中' | '空桌' | '已預定';
     orderNumber: string;
+    startTime: string;
     remainingMealTime: number;
     totalMealTime: number;
     tableNumber: string;
     cookerNumber: number;
     seats: number;
     notify: string;
+    remark: string;
 };
 
 
@@ -36,6 +38,10 @@ const UpdateTable = ({ initialAreas }: { initialAreas: Payment[] }) => {
         const interval = setInterval(fetchData, 1000); 
         return () => clearInterval(interval);
     }, []);
+
+    // useEffect(() => {
+    //     fetchData();
+    // }, []);
 
     return (
         <div className="grid h-screen grid-cols-2 gap-x-16 gap-y-8 px-28">

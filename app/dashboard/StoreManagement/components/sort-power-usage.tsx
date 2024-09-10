@@ -38,6 +38,16 @@ async function fetchPowerData(apiUrl: string, filterFn: (usage: PowerUsage) => b
         .sort((a, b) => b.watt - a.watt); // 按照用电量降序排序
 }
 
+const MORANDI_COLORS = [
+    '#B8A9C9', // 柔和的紫色
+    '#D3B8AE', // 柔和的粉紅色
+    '#A3C1AD', // 柔和的綠色
+    '#C7B198', // 柔和的棕色
+    '#D6C6B9', // 柔和的米色
+    '#8DA0A8'  // 柔和的藍灰色
+];
+
+
 export function RecentPowerDay() {
     const [dataDay, setDataDay] = useState<{ name: string; watt: number }[]>([]);
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
@@ -52,81 +62,94 @@ export function RecentPowerDay() {
         };
 
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次数据
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次数据
         return () => clearInterval(intervalId); // 清除定时器
     }, [apiUrl]);
 
     return (
         <>
             <div className="flex ">
-                <PieChart width={340} height={340}>
-                    <Pie
-                        data={dataDay}
-                        dataKey="watt"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={120}
-                        fill="#8884d8"
-                    >
-                        {dataDay.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`}/>
-                        ))}
-                    </Pie>
-                    <Tooltip
-                        formatter={(value: number, name) => [`${(value / dataDay.reduce((acc, cur) => acc + cur.watt, 0) * 100).toFixed(2)}%`, name, ]}
-                    />
-                </PieChart>
+                {dataDay.length > 0 ? (
+                    <PieChart width={340} height={340}>
+                        <Pie
+                            data={dataDay}
+                            dataKey="watt"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={120}
+                            fill="#8884d8"
+                        >
+                            {dataDay.map((entry, index) => (
+                                <Cell key={MORANDI_COLORS[index % MORANDI_COLORS.length]}/>
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            formatter={(value: number, name) => [`${(value / dataDay.reduce((acc, cur) => acc + cur.watt, 0) * 100).toFixed(2)}%`, name, ]}
+                        />
+                    </PieChart>
+                    ) : (
+                        <p className="flex items-center justify-center h-[350px] w-full text-gray-500 font-bold">本日尚未取得資料</p>
+                    )}
+                
                 <div className="flex ">
                     <div className="space-y-8">
-                        {dataDay.slice(0, 5).map((item) => (
-                            <div key={item.name} className="flex items-center">
-                                <Avatar className="h-9 w-9">
-                                    <AvatarFallback>{item.name.slice(-1)}</AvatarFallback>
-                                </Avatar>
-                                <div className="ml-4 flex gap-4">
-                                    <p className="text-base font-medium ">{item.name} :</p>
-                                    <div className="font-medium">
-                                        {item.watt}
-                                        <span className="ml-1 text-sm font-bold">kw</span>
+                        {dataDay.length > 0 ? (
+                            dataDay.slice(0, 5).map((item) => (
+                                <div key={item.name} className="flex items-center">
+                                    <Avatar className="h-9 w-9">
+                                        <AvatarFallback>{item.name.slice(-1)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="ml-4 flex gap-4">
+                                        <p className="text-base font-medium ">{item.name} :</p>
+                                        <div className="font-medium">
+                                            {(item.watt / 1000).toFixed(3)}
+                                            <span className="ml-1 text-sm font-bold">kw</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p></p>
+                        )}
                     </div>
                 </div>
             </div>
             <div className="flex flex-grow justify-end ">
-                <Dialog>
-                    <DialogTrigger>
-                        <Button variant="outline">查看更多</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>全部電磁爐用電情況</DialogTitle>
-                            <DialogDescription>
-                                <ScrollArea className="h-[320px] w-[450px] p-4">
-                                <div className="space-y-8">
-                                        {dataDay.map((item) => (
-                                            <div key={item.name} className="flex items-center">
-                                                <Avatar className="h-9 w-9">
-                                                    <AvatarFallback>{item.name.slice(-1)}</AvatarFallback>
-                                                </Avatar>
-                                                <div className="ml-4 flex gap-4">
-                                                    <p className="text-base font-medium ">{item.name} :</p>
-                                                    <div className="font-medium">
-                                                        {item.watt.toFixed(1)}
-                                                        <span className="ml-1 text-sm font-bold">w</span>
+                {dataDay.length > 0 ? (
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button variant="outline">查看更多</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>全部電磁爐用電情況</DialogTitle>
+                                <DialogDescription>
+                                    <ScrollArea className="h-[320px] w-[450px] p-4">
+                                    <div className="space-y-8">
+                                            {dataDay.map((item) => (
+                                                <div key={item.name} className="flex items-center">
+                                                    <Avatar className="h-9 w-9">
+                                                        <AvatarFallback>{item.name.slice(-1)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="ml-4 flex gap-4">
+                                                        <p className="text-base font-medium ">{item.name} :</p>
+                                                        <div className="font-medium">
+                                                            {(item.watt / 1000).toFixed(3)}
+                                                            <span className="ml-1 text-sm font-bold">kw</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </ScrollArea>
-                            </DialogDescription>
-                        </DialogHeader>
-                    </DialogContent>
-                </Dialog>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                </DialogDescription>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
+                ) : (
+                    <p></p>
+                )}
             </div>
         </>
     );
@@ -134,7 +157,15 @@ export function RecentPowerDay() {
 export function RecentPowerMonth() {
     const [dataMonth, setDataMonth] = useState<{ name: string; watt: number }[]>([]);
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-
+    
+    const MORANDI_COLORS = [
+        '#B8A9C9', // 柔和的紫色
+        '#D3B8AE', // 柔和的粉紅色
+        '#A3C1AD', // 柔和的綠色
+        '#C7B198', // 柔和的棕色
+        '#D6C6B9', // 柔和的米色
+        '#8DA0A8'  // 柔和的藍灰色
+    ];
     useEffect(() => {
         const fetchData = async () => {
             const thisMonth = dayjs().format('YYYY-MM');
@@ -145,31 +176,35 @@ export function RecentPowerMonth() {
         };
 
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次数据
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次数据
         return () => clearInterval(intervalId); // 清除定时器
     }, [apiUrl]);
 
     return (
         <>
             <div className="flex ">
-                <PieChart width={340} height={340}>
-                    <Pie
-                        data={dataMonth}
-                        dataKey="watt"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={120}
-                        fill="#8884d8"
-                    >
-                        {dataMonth.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`}/>
-                        ))}
-                    </Pie>
-                    <Tooltip
-                        formatter={(value: number, name) => [`${(value / dataMonth.reduce((acc, cur) => acc + cur.watt, 0) * 100).toFixed(2)}%`, name, ]}
-                    />
-                </PieChart>
+                {dataMonth.length > 0 ? (
+                    <PieChart width={340} height={340}>
+                        <Pie
+                            data={dataMonth}
+                            dataKey="watt"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={120}
+                            fill="#8884d8"
+                        >
+                            {dataMonth.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={MORANDI_COLORS[index % MORANDI_COLORS.length]}/>
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            formatter={(value: number, name) => [`${(value / dataMonth.reduce((acc, cur) => acc + cur.watt, 0) * 100).toFixed(2)}%`, name, ]}
+                        />
+                    </PieChart>
+                    ) : (
+                        <p className="flex items-center justify-center h-[350px] w-full text-gray-500 font-bold">本月尚未取得資料</p>
+                    )}
                 <div className="flex ">
                     <div className="space-y-8">
                         {dataMonth.slice(0, 5).map((item) => (
@@ -180,7 +215,7 @@ export function RecentPowerMonth() {
                                 <div className="ml-4 flex gap-4">
                                     <p className="text-base font-medium ">{item.name} :</p>
                                     <div className="font-medium">
-                                        {item.watt}
+                                        {(item.watt / 1000).toFixed(3)}
                                         <span className="ml-1 text-sm font-bold">kw</span>
                                     </div>
                                 </div>
@@ -190,36 +225,40 @@ export function RecentPowerMonth() {
                 </div>
             </div>
             <div className="flex flex-grow justify-end ">
-                <Dialog>
-                    <DialogTrigger>
-                        <Button variant="outline">查看更多</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>全部電磁爐用電情況</DialogTitle>
-                            <DialogDescription>
-                                <ScrollArea className="h-[320px] w-[450px] p-4">
-                                <div className="space-y-8">
-                                        {dataMonth.map((item) => (
-                                            <div key={item.name} className="flex items-center">
-                                                <Avatar className="h-9 w-9">
-                                                    <AvatarFallback>{item.name.slice(-1)}</AvatarFallback>
-                                                </Avatar>
-                                                <div className="ml-4 flex gap-4">
-                                                    <p className="text-base font-medium ">{item.name} :</p>
-                                                    <div className="font-medium">
-                                                        {item.watt.toFixed(1)}
-                                                        <span className="ml-1 text-sm font-bold">w</span>
+                {dataMonth.length > 0 ? (
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button variant="outline">查看更多</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>全部電磁爐用電情況</DialogTitle>
+                                <DialogDescription>
+                                    <ScrollArea className="h-[320px] w-[450px] p-4">
+                                    <div className="space-y-8">
+                                            {dataMonth.map((item) => (
+                                                <div key={item.name} className="flex items-center">
+                                                    <Avatar className="h-9 w-9">
+                                                        <AvatarFallback>{item.name.slice(-1)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="ml-4 flex gap-4">
+                                                        <p className="text-base font-medium ">{item.name} :</p>
+                                                        <div className="font-medium">
+                                                            {(item.watt / 1000).toFixed(3)}
+                                                            <span className="ml-1 text-sm font-bold">kw</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </ScrollArea>
-                            </DialogDescription>
-                        </DialogHeader>
-                    </DialogContent>
-                </Dialog>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                </DialogDescription>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
+                ) : (
+                    <p></p>
+                )}
             </div>
         </>
     );
@@ -227,7 +266,7 @@ export function RecentPowerMonth() {
 export function RecentPowerYear() {
     const [dataYear, setDataYear] = useState<{ name: string; watt: number }[]>([]);
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-
+    
     useEffect(() => {
         const fetchData = async () => {
             const thisYear = dayjs().format('YYYY');
@@ -238,31 +277,35 @@ export function RecentPowerYear() {
         };
 
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次数据
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次数据
         return () => clearInterval(intervalId); // 清除定时器
     }, [apiUrl]);
 
     return (
         <>
             <div className="flex ">
-                <PieChart width={340} height={340}>
-                    <Pie
-                        data={dataYear}
-                        dataKey="watt"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={120}
-                        fill="#8884d8"
-                    >
-                        {dataYear.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`}/>
-                        ))}
-                    </Pie>
-                    <Tooltip
-                        formatter={(value: number, name) => [`${(value / dataYear.reduce((acc, cur) => acc + cur.watt, 0) * 100).toFixed(2)}%`, name, ]}
-                    />
-                </PieChart>
+                {dataYear.length > 0 ? (
+                    <PieChart width={340} height={340}>
+                        <Pie
+                            data={dataYear}
+                            dataKey="watt"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={120}
+                            fill="#8884d8"
+                        >
+                            {dataYear.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={MORANDI_COLORS[index % MORANDI_COLORS.length]}/>
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            formatter={(value: number, name) => [`${(value / dataYear.reduce((acc, cur) => acc + cur.watt, 0) * 100).toFixed(2)}%`, name, ]}
+                        />
+                    </PieChart>
+                    ) : (
+                        <p className="flex items-center justify-center h-[350px] w-full text-gray-500 font-bold">本年尚未取得資料</p>
+                    )}
                 <div className="flex ">
                     <div className="space-y-8">
                         {dataYear.slice(0, 5).map((item) => (
@@ -273,7 +316,7 @@ export function RecentPowerYear() {
                                 <div className="ml-4 flex gap-4">
                                     <p className="text-base font-medium ">{item.name} :</p>
                                     <div className="font-medium">
-                                        {item.watt}
+                                        {(item.watt / 1000).toFixed(3)}
                                         <span className="ml-1 text-sm font-bold">kw</span>
                                     </div>
                                 </div>
@@ -283,6 +326,7 @@ export function RecentPowerYear() {
                 </div>
             </div>
             <div className="flex flex-grow justify-end ">
+                {dataYear.length > 0 ? (
                 <Dialog>
                     <DialogTrigger>
                         <Button variant="outline">查看更多</Button>
@@ -301,8 +345,8 @@ export function RecentPowerYear() {
                                                 <div className="ml-4 flex gap-4">
                                                     <p className="text-base font-medium ">{item.name} :</p>
                                                     <div className="font-medium">
-                                                        {item.watt.toFixed(1)}
-                                                        <span className="ml-1 text-sm font-bold">w</span>
+                                                        {(item.watt / 1000).toFixed(3)}
+                                                        <span className="ml-1 text-sm font-bold">kw</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -313,6 +357,9 @@ export function RecentPowerYear() {
                         </DialogHeader>
                     </DialogContent>
                 </Dialog>
+                ) : (
+                    <p></p>
+                )}
             </div>
         </>
     );

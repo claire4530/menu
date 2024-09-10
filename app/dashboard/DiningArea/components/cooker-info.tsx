@@ -53,7 +53,7 @@ const CookerInfo: React.FC<CookerInfoProps> = ({
                 />
             </div>
             <div className='text-black hover:bg-slate-100 grid'>
-                <div className='p-4'>火力狀況：{databaseFireStatus}</div>
+                <div className='p-4'>火力狀況：{databaseState === "關閉" ? '/' : databaseFireStatus}</div>
                 <div className="flex gap-4 p-4 items-center rounded-md">
                     {numbers.map((num) => (
                         <button

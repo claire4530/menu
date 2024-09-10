@@ -64,12 +64,13 @@ const TotalPowerUsage : React.FC = () => {
             return false;
         });
 
-        return filteredData.reduce((total, item) => total + item.watt, 0);
+        const totalWatt = filteredData.reduce((total, item) => total + item.watt, 0);
+        return (totalWatt / 1000).toFixed(3);
     };
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);
@@ -108,7 +109,7 @@ const TotalPowerUsage : React.FC = () => {
             <CardContent>
                 <div className="mt-2 font-bold text-4xl">
                     <span>&nbsp;&nbsp;{calculateTotalWatt(selectedTimeFrame)} </span>
-                    <span className="font-bold text-lg mt-3 text-muted-foreground">瓦</span>
+                    <span className="font-bold text-lg mt-3 text-muted-foreground">千瓦</span>
                 </div>
             </CardContent>
         </Card>

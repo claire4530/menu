@@ -105,8 +105,18 @@ export function OverviewMonth() {
             const response = await fetch(`${apiUrl}/api/order-details`);
             const result: OrderDetail[] = await response.json();
             
-            // 獲取當月的天數
+            // 獲取當前月份的起始與結束時間
             const currentDate = dayjs();
+            const startOfMonth = currentDate.startOf('month');
+            const endOfMonth = currentDate.endOf('month');
+            
+            // 過濾只保留本月的訂單
+            const filteredOrders = result.filter(order => {
+                const orderDate = dayjs(order.orderTime);
+                return orderDate.isAfter(startOfMonth) && orderDate.isBefore(endOfMonth);
+            });
+            
+            // 獲取當月的天數
             const daysInMonth = currentDate.daysInMonth();
             
             // 初始化每日的營收為0
@@ -116,14 +126,15 @@ export function OverviewMonth() {
                 dailyData[day] = 0;
             }
             
-            result.forEach(order => {
+            // 累加本月的訂單數據
+            filteredOrders.forEach(order => {
                 const day = dayjs(order.orderTime).format('DD');
                 dailyData[day] += order.payment;
             });
             
-            // 將數據按日期排序
+            // 將數據按日期排序並準備數據格式
             const data = Object.keys(dailyData)
-                .sort((a, b) => parseInt(a) - parseInt(b)) // 排序
+                .sort((a, b) => parseInt(a) - parseInt(b))
                 .map(day => ({
                     name: day,
                     total: dailyData[day],
@@ -132,6 +143,7 @@ export function OverviewMonth() {
             setDataMonth(data);
         } catch (error) {
             console.error('Error fetching data:', error);
+            setDataMonth([]);  // 如果請求失敗，清空數據
         }
     };
 

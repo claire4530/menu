@@ -97,19 +97,19 @@ const FormMenu = ({ menu_id }: FormMenuProps) => {
 
     return (
         <FormComponent {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+            <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
-                        <FormItem className="flex items-center gap-4 px-4">
-                            <FormLabel className='text-base'>請輸入菜品名稱 :</FormLabel>
+                        <FormItem className="flex gap-2 justify-between px-4 py-6 items-center rounded-md hover:bg-slate-100 text-black">
+                            <FormLabel className='text-base font-semibold'>請輸入菜品名稱 :</FormLabel>
                             <FormControl>
                                 <Input
                                     type="text"
                                     placeholder="請輸入菜品名稱..."
                                     {...field}
-                                    className="rounded-md border border-gray-400 px-4 py-2 w-60"
+                                    className="rounded-md border border-gray-400 w-60"
                                 />
                             </FormControl>
                             <FormMessage />
@@ -121,16 +121,16 @@ const FormMenu = ({ menu_id }: FormMenuProps) => {
                     control={form.control}
                     name="image"
                     render={({ }) => (
-                        <FormItem className="flex items-center gap-4 px-4">
-                            <FormLabel className='text-base'>上傳圖片 :</FormLabel>
+                        <FormItem className="flex items-center gap-2 px-4 py-6 justify-between text-black rounded-md hover:bg-slate-100">
+                            <FormLabel className='text-base font-semibold'>上傳圖片 :</FormLabel>
                             <FormControl>
-                                <div className="text-base grid gap-4 justify-right px-4 py-6 h-30 text-black rounded-md hover:bg-slate-100">
+                                <div className="">
                                     <Input
                                         placeholder="Select file"
                                         type="file"
                                         onChange={(e) => setFile(e.target.files?.[0])}
                                         // {...field}
-                                        className="rounded-md border border-gray-400 px-4 py-2 w-60"
+                                        className="rounded-md border border-gray-400 w-60"
                                     />
                                 </div>
                             </FormControl>
@@ -143,13 +143,13 @@ const FormMenu = ({ menu_id }: FormMenuProps) => {
                     control={form.control}
                     name="description"
                     render={({ field }) => (
-                        <FormItem className="flex items-center gap-4 px-4">
-                            <FormLabel className='text-base'>請輸入菜品介紹 :</FormLabel>
+                        <FormItem className="flex items-center gap-2 px-4 py-6 justify-between text-black rounded-md hover:bg-slate-100">
+                            <FormLabel className='text-base font-semibold'>請輸入菜品介紹 :</FormLabel>
                             <FormControl>
                                 <Textarea
                                     placeholder="請輸入菜品介紹..."
                                     {...field}
-                                    className="rounded-md border border-gray-400 px-4 py-2 w-60"
+                                    className="rounded-md border border-gray-400 w-60"
                                 />
                             </FormControl>
                             <FormMessage />
@@ -161,14 +161,14 @@ const FormMenu = ({ menu_id }: FormMenuProps) => {
                     control={form.control}
                     name="money"
                     render={({ field }) => (
-                        <FormItem className="flex items-center gap-4 px-4">
-                            <FormLabel className='text-base'>請輸入菜品價錢 :</FormLabel>
+                        <FormItem className="flex items-center gap-2 px-4 py-6 justify-between text-black rounded-md hover:bg-slate-100">
+                            <FormLabel className='text-base font-semibold'>請輸入菜品價錢 :</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
                                     placeholder="請輸入菜品價錢..."
                                     {...field}
-                                    className="rounded-md border border-gray-400 px-4 py-2 w-60"
+                                    className="rounded-md border border-gray-400 w-60"
                                 />
                             </FormControl>
                             <FormMessage />
@@ -180,8 +180,8 @@ const FormMenu = ({ menu_id }: FormMenuProps) => {
                     control={form.control}
                     name="switchOn"
                     render={({ field }) => (
-                        <FormItem className="flex items-center gap-5 px-4">
-                            <FormLabel className='text-base'>請輸入菜品是否當季 :</FormLabel>
+                        <FormItem className="flex items-center gap-2 px-4 py-6 justify-between text-black rounded-md hover:bg-slate-100">
+                            <FormLabel className='text-base font-semibold'>請輸入菜品是否當季 :</FormLabel>
                             <FormControl>
                                 <Switch
                                     id="請輸入菜品是否當季..."

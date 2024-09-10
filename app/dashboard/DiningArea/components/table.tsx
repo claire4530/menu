@@ -18,6 +18,9 @@ import OrderDetails from './order-details'
 import { CookingPot } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import Notify from './notify'
+import EditRemark from './edit-remark'
+import FormMenu from './form'
+
 import {
     Dialog,
     DialogContent,
@@ -27,17 +30,24 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
+import dayjs from 'dayjs'
 
+interface OrderDetailsProps {
+    tableNumber: string
+    orderTime: string
+}
 interface TableProps {
     id: number
     state: string
     orderNumber: string
+    startTime: string
     remainingMealTime: number
     totalMealTime: number
     tableNumber: string
     seats: number
     areas_id: number
     notify: string
+    remark: string
 }
 
 export type PaymentFire = {
@@ -54,12 +64,14 @@ export type PaymentFire = {
 const Table: React.FC<TableProps & { fetchTableData: () => void }> = ({
     state,
     orderNumber,
+    startTime,
     remainingMealTime,
     totalMealTime,
     tableNumber,
     seats,
     areas_id,
     notify,
+    remark,
 }) => {
 
     const [cookerProps, setCookers] = useState<PaymentFire[]>([]);
@@ -88,6 +100,27 @@ const Table: React.FC<TableProps & { fetchTableData: () => void }> = ({
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ tableNumber, newState }),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                console.log(result.message);
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error updating table state:', error);
+        }
+    };
+
+    const updateTableRemark = async (tableNumber: string, remark: string) => {
+        try {
+            const response = await fetch(`${apiUrl}/api/edit-table-remark`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tableNumber, remark }),
             });
 
             const result = await response.json();
@@ -136,8 +169,80 @@ const Table: React.FC<TableProps & { fetchTableData: () => void }> = ({
             updateTableState(tableNumber, '已預定');
         } else if (state === '已預定') {
             updateTableState(tableNumber, '空桌');
+            updateTableRemark(tableNumber, "")
         }
     };
+
+    const [orderCount, setOrderCount] = useState(0); // 訂單數量
+
+    const OrderDetailsData = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/api/order-details`);
+            const result = await response.json();
+
+            // 獲取當前日期
+            const currentDate = dayjs().format('YYYY-MM-DD');
+
+            // 過濾出本日且符合指定桌號的訂單
+            const filteredOrders = result.filter((item: OrderDetailsProps) => {
+                const isToday = dayjs(item.orderTime).format('YYYY-MM-DD') === currentDate;
+                const isSameTable = item.tableNumber === tableNumber;
+                return isToday && isSameTable;
+            });
+
+             // 設置訂單數量
+            const orderCount = filteredOrders.length;
+            const totalMealTime = orderCount * remainingMealTime;
+
+            await updateTableTotalMealTime(tableNumber, totalMealTime);
+
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+    const updateTableTotalMealTime = async (tableNumber: string, totalMealTime: number) => {
+        try {
+            const response = await fetch(`${apiUrl}/api/edit-table-all-meal-time`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tableNumber, totalMealTime }),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                console.log(result.message);
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error updating table state:', error);
+        }
+    };
+
+    const [remainingTime, setRemainingTime] = useState(remainingMealTime);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            // 計算已經過的時間（以分鐘為單位）
+            const now = dayjs();
+            const start = dayjs(startTime);
+            const elapsedMinutes = now.diff(start, 'minute');
+
+            // 計算剩餘時間
+            const updatedRemainingTime = remainingMealTime - elapsedMinutes;
+
+            // 如果剩餘時間小於或等於 0，顯示 0，否則顯示剩餘時間
+            setRemainingTime(Math.max(updatedRemainingTime, 0));
+        }, 1000); // 每秒更新一次
+
+        return () => clearInterval(interval); // 組件卸載時清除定時器
+    }, [startTime, remainingMealTime]);
+
+    useEffect(() => {
+        OrderDetailsData();
+    }, []);
 
     useEffect(() => {
         fetchData(); // 初始加载数据
@@ -176,8 +281,7 @@ const Table: React.FC<TableProps & { fetchTableData: () => void }> = ({
                                         <>
                                             <div>訂單編號: {orderNumber}</div>
                                             <div className="flex items-baseline gap-2">
-                                                剩餘用餐時間:{' '}
-                                                {remainingMealTime}
+                                                剩餘用餐時間:&nbsp;{remainingTime}
                                                 <span className="text-xs font-bold">
                                                     min
                                                 </span>
@@ -222,7 +326,7 @@ const Table: React.FC<TableProps & { fetchTableData: () => void }> = ({
                                         <>
                                             <div className="flex flex-col gap-7">
                                                 用餐人數:{' 4人'}
-                                                <OrderDetails>
+                                                <OrderDetails orderNumber={orderNumber}>
                                                     <Button variant="outline">
                                                         訂單明細
                                                     </Button>
@@ -233,10 +337,23 @@ const Table: React.FC<TableProps & { fetchTableData: () => void }> = ({
                                     {state === '已預定' && (
                                         <>
                                             <div className="flex flex-col gap-7">
-                                                用餐人數:{' 4人'}
-                                                <Button variant="outline">
-                                                    修改人數
-                                                </Button>
+                                                <div>備註:&nbsp;{remark}</div>
+                                                <EditRemark tableNumber={tableNumber} remark={remark}>
+                                                    <Button variant="outline" className=''>
+                                                        輸入預定資料
+                                                    </Button>
+                                                </EditRemark>
+                                            </div>
+                                        </>
+                                    )}
+                                    {state === '空桌' && (
+                                        <>
+                                            <div className="flex flex-col gap-7">
+                                                <EditRemark tableNumber={tableNumber} remark={remark}>
+                                                    <Button variant="outline" className='' onClick={() => changeState(tableNumber)}>
+                                                        預定
+                                                    </Button>
+                                                </EditRemark>
                                             </div>
                                         </>
                                     )}

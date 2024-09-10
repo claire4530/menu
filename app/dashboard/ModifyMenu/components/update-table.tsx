@@ -43,8 +43,7 @@ const UpdateTable = ({ initialAreas = [] }: { initialAreas: Area[] }) => {
     }, []);
 
     return (
-        <Tabs defaultValue="account" className="pt-10">
-            {/* <ScrollArea className="h-[80px] w-[1180px] whitespace-nowrap flex space-x-2 overflow-x-auto"> */}
+        <Tabs defaultValue="area-15" className="pt-10">
                 <TabsList className="h-full grid grid-cols-6">
                     {Array.isArray(areas) && areas.map((area, index: number) => (
                         <TabsTrigger
@@ -62,11 +61,7 @@ const UpdateTable = ({ initialAreas = [] }: { initialAreas: Area[] }) => {
                             </div>
                         </TabsTrigger>
                     ))}
-                    
-                    
                 </TabsList>
-                {/* <ScrollBar orientation="horizontal" />
-            </ScrollArea> */}
             {Array.isArray(areas) && areas.map((area, index) => (
                 <TabsContent key={area.id} value={`area-${area.id}`}>
                     <Table id={area.id} name={area.name}/>

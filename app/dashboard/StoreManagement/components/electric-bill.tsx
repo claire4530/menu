@@ -110,7 +110,7 @@ const ElectricityBill : React.FC = () => {
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);

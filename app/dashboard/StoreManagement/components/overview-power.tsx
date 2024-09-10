@@ -51,7 +51,7 @@ export function OverviewYear() {
             
             const data = Object.keys(monthlyData).map(month => ({
                 name: month,
-                total: monthlyData[month],
+                total: (monthlyData[month] / 1000),
             }));
             
             setDataYear(data);
@@ -62,7 +62,7 @@ export function OverviewYear() {
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);
@@ -82,7 +82,7 @@ export function OverviewYear() {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `${value} W`}
+                    tickFormatter={(value) => `${value} kw`}
                 />
                 <Line
                     type="monotone"
@@ -105,8 +105,18 @@ export function OverviewMonth() {
             const response = await fetch(`${apiUrl}/api/power-usage`);
             const result: PowerUsage[] = await response.json();
 
+             // 獲取當前月份的起始與結束時間
+             const currentDate = dayjs();
+             const startOfMonth = currentDate.startOf('month');
+             const endOfMonth = currentDate.endOf('month');
+             
+             // 過濾只保留本月的訂單
+             const filteredOrders = result.filter(order => {
+                 const orderDate = dayjs(order.powerTime);
+                 return orderDate.isAfter(startOfMonth) && orderDate.isBefore(endOfMonth);
+             });
+
             // 獲取當月的天數
-            const currentDate = dayjs();
             const daysInMonth = currentDate.daysInMonth();
 
             // 初始化每日的用電量為0
@@ -116,7 +126,7 @@ export function OverviewMonth() {
                 dailyData[day] = 0;
             }
 
-            result.forEach(usage => {
+            filteredOrders.forEach(usage => {
                 const day = dayjs(usage.powerTime).format('DD');
                 dailyData[day] += usage.watt;
             });
@@ -126,7 +136,7 @@ export function OverviewMonth() {
                 .sort((a, b) => parseInt(a) - parseInt(b)) // 排序
                 .map(day => ({
                     name: day,
-                    total: dailyData[day],
+                    total: (dailyData[day] / 1000),
                 }));
 
             setDataMonth(data);
@@ -137,7 +147,7 @@ export function OverviewMonth() {
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);
@@ -157,7 +167,7 @@ export function OverviewMonth() {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `${value} W`}
+                    tickFormatter={(value) => `${value} kw`}
                 />
                 <Line
                     type="monotone"
@@ -204,7 +214,7 @@ export function OverviewDay() {
                 .sort() // 按鍵（即小時）進行排序
                 .map(hour => ({
                     name: hour,
-                    total: hourlyData[hour],
+                    total: (hourlyData[hour] / 1000),
                 }));
 
             setDataDay(data);
@@ -215,7 +225,7 @@ export function OverviewDay() {
 
     useEffect(() => {
         fetchData();
-        const intervalId = setInterval(fetchData, 3000); // 每三秒抓取一次資料
+        const intervalId = setInterval(fetchData, 900000); // 每三秒抓取一次資料
 
         return () => clearInterval(intervalId); // 清除定時器
     }, [apiUrl]);
@@ -236,7 +246,7 @@ export function OverviewDay() {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `${value} W`}
+                    tickFormatter={(value) => `${value} kw`}
                 />
                 <Line
                     type="monotone"

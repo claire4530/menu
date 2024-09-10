@@ -59,18 +59,22 @@ export function RecentSalesDay() {
 
     return (
         <div className="space-y-8">
-            {dataDay.map((item, index) => (
-                <div key={index} className="flex items-center">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src="" alt="Avatar" />
-                        <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none">{item.name}</p>
+            {dataDay.length > 0 ?(
+                dataDay.map((item, index) => (
+                    <div key={index} className="flex items-center">
+                        <Avatar className="h-9 w-9">
+                            <AvatarImage src="" alt="Avatar" />
+                            <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none">{item.name}</p>
+                        </div>
+                        <div className="ml-auto font-medium">{item.quantity}</div>
                     </div>
-                    <div className="ml-auto font-medium">{item.quantity}</div>
-                </div>
-            ))}
+                ))
+            ):(
+                <div className="text-sm text-gray-500 text-center">本日尚未取得資料</div>
+            )}
         </div>
     );
 }
@@ -95,18 +99,22 @@ export function RecentSalesMonth() {
 
     return (
         <div className="space-y-8">
-            {dataMonth.map((item, index) => (
-                <div key={index} className="flex items-center">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src="" alt="Avatar" />
-                        <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none">{item.name}</p>
+            {dataMonth.length > 0 ?(
+                dataMonth.map((item, index) => (
+                    <div key={index} className="flex items-center">
+                        <Avatar className="h-9 w-9">
+                            <AvatarImage src="" alt="Avatar" />
+                            <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none">{item.name}</p>
+                        </div>
+                        <div className="ml-auto font-medium">{item.quantity}</div>
                     </div>
-                    <div className="ml-auto font-medium">{item.quantity}</div>
-                </div>
-            ))}
+                ))
+            ):(
+                <div className="text-sm text-gray-500 text-center">本月尚未取得資料</div>
+            )}
         </div>
     );
 }
@@ -131,18 +139,22 @@ export function RecentSalesYear() {
 
     return (
         <div className="space-y-8">
-            {dataYear.map((item, index) => (
-                <div key={index} className="flex items-center">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src="" alt="Avatar" />
-                        <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none">{item.name}</p>
+            {dataYear.length > 0 ?(
+                dataYear.map((item, index) => (
+                    <div key={index} className="flex items-center">
+                        <Avatar className="h-9 w-9">
+                            <AvatarImage src="" alt="Avatar" />
+                            <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none">{item.name}</p>
+                        </div>
+                        <div className="ml-auto font-medium">{item.quantity}</div>
                     </div>
-                    <div className="ml-auto font-medium">{item.quantity}</div>
-                </div>
-            ))}
+                ))
+            ):(
+                <div className="text-sm text-gray-500 text-center ">本日尚未取得資料</div>
+            )}
         </div>
     );
 }

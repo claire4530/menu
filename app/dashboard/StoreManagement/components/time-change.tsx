@@ -91,7 +91,7 @@ export const TimeChange: React.FC = ({
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="ghost" className="h-34 flex gap-4 font-bold text-4xl" onClick={returnToPrevious}>
-                    {time.map((times) => (
+                    {time && time.map((times) => (
                         <div key={times.id} className="">
                             <p>{times.meal_time}</p>
                         </div>
