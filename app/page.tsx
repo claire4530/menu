@@ -15,7 +15,7 @@ export default function Page() {
                     <p
                         className={`${lusitana.className} text-xl text-gray-800 md:text-3xl md:leading-normal`}
                     >
-                        <strong>這是一個火鍋店的點餐系統</strong>
+                        <strong>櫃台系統</strong>
                     </p>
                     <Link
                         href="/login"

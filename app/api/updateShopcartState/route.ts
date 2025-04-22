@@ -5,8 +5,8 @@ export async function POST(req: Request) {
     try {
         const { state, tableNumber } = await req.json()
 
-        const query = 'UPDATE areas SET state = ? WHERE tableNumber = ?;'
-        const values = [state, tableNumber]
+        const query = 'UPDATE shopcart SET state = ? WHERE state = ? AND tableNumber = ?'
+        const values = [ '送出', state, tableNumber ]
 
         await new Promise((resolve, reject) => {
             db.query(query, values, (err: any) => {

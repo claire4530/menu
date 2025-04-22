@@ -1,54 +1,32 @@
 'use client'
-
-import {
-    UserGroupIcon,
-    HomeIcon,
-    DocumentDuplicateIcon,
-    FireIcon,
-    BuildingStorefrontIcon,
-    BellAlertIcon,
-    ClipboardDocumentListIcon,
-    BoltIcon,
-    BanknotesIcon,
-    ComputerDesktopIcon,
-} from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
+import {
+    ShoppingCartIcon,
+    ClipboardDocumentCheckIcon,
+    DocumentDuplicateIcon,
+    FireIcon,
+  } from '@heroicons/react/24/outline';
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
-const links = [
-    {
-        name: '用餐區域',
-        href: '/dashboard/DiningArea',
-        icon: UserGroupIcon,
-    },
-    { name: '區域管理', href: '/dashboard/Fireboard', icon: FireIcon },
-    {
-        name: '新增菜單',
-        href: '/dashboard/ModifyMenu',
-        icon: BuildingStorefrontIcon,
-    },
-    {
-        name: '查詢訂單',
-        href: '/dashboard/OrderTracking',
-        icon: ClipboardDocumentListIcon,
-    },
-    {
-        name: '通知',
-        href: '/dashboard/Notify',
-        icon: BellAlertIcon,
-    },
-    {
-        name: '店鋪管理',
-        href: '/dashboard/StoreManagement',
-        icon: ComputerDesktopIcon,
-    },
-]
+interface PersonalpageProps {
+    id: string;  // 定義接收的 id 類型
+}
 
-export default function NavLinks() {
+export default function NavLinks({ id }: PersonalpageProps) {
     const pathname = usePathname()
+
+    const links = [
+        { name: '菜單', href: `/dashboard/${id}/Menu`, icon: DocumentDuplicateIcon },
+        { name: '購物車', href: `/dashboard/${id}/ShopCart`, icon: ShoppingCartIcon },
+        {
+          name: '訂單查詢',
+          href: `/dashboard/${id}/Order`,
+          icon: ClipboardDocumentCheckIcon,
+        },
+        { name: '電磁爐控制', href: `/dashboard/${id}/Cooker`, icon: FireIcon }
+    ];
+    
     return (
         <>
             {links.map((link) => {
@@ -58,15 +36,15 @@ export default function NavLinks() {
                         key={link.name}
                         href={link.href}
                         className={clsx(
-                            'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+                            'flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-[#71503e] hover:text-white md:flex-none md:justify-start md:p-2 md:px-3',
                             {
-                                'bg-sky-100 text-blue-600':
-                                    pathname === link.href,
+                                'bg-[#f5efe4]': pathname !== link.href,  // 僅當 pathname 不等於 link.href 時使用 bg-gray-50
+                                'bg-[#71503e] text-white': pathname === link.href,
                             }
                         )}
                     >
                         <LinkIcon className="w-6" />
-                        <p className="hidden md:block">{link.name}</p>
+                        <p className="font-semibold hidden md:block">{link.name}</p>
                     </Link>
                 )
             })}

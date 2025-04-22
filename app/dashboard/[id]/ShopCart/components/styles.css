@@ -1,0 +1,31 @@
+.order-list {
+  display: grid;
+  gap: 30px; /* Increased gap between items */
+}
+
+.order-list-header,
+.order-row {
+  display: contents; /* Use grid layout for both header and rows */
+}
+
+.order-cell {
+  width: 500px; /* Fixed width for each column */
+  text-align: left; /* Align text to the left */
+  padding: 15px; /* Increase padding for better spacing */
+  overflow: hidden; /* Hide overflow text */
+  text-overflow: ellipsis; /* Show ellipsis for overflowing text */
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+.order-list-header span {
+  font-weight: bold;
+  width: 220px; /* Fixed width for each column */
+  text-align: left; /* Align header text to the left */
+  padding: 15px; /* Increase padding */
+  background-color: #090909; /* Optional: Add background color for header */
+  color: white; /* Ensure text color contrasts with the background */
+}
+
+.order-row-container {
+  margin-bottom: 20px; /* Adjust the spacing between rows */
+}
